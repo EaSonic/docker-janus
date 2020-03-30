@@ -1,10 +1,10 @@
 include env_make
-NS = jemmic
+NS = eason
 VERSION ?= latest
 
-REPO = docker-janus
+REPO = janus
 NAME = janus
-INSTANCE = buster
+INSTANCE = gateway
 
 .PHONY: build push shell run start stop rm release
 
@@ -18,10 +18,10 @@ shell:
 	docker exec -it $(NAME)-$(INSTANCE) /bin/bash
 
 run:
-	docker run --rm --name $(NAME)-$(INSTANCE) $(PORTS) $(VOLUMES) $(ENV) $(NS)/$(REPO):$(VERSION)
+	docker run -it --name $(NAME)-$(INSTANCE) $(PORTS) $(VOLUMES) $(ENV) $(NS)/$(REPO):$(VERSION)
 
 start:
-	docker start $(NAME)-$(INSTANCE)
+	docker start -ai $(NAME)-$(INSTANCE)
 
 stop:
 	docker stop $(NAME)-$(INSTANCE)

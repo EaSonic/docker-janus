@@ -4,11 +4,11 @@
 ############################################################
 
 # set base image debian buster with minimal packages installed
-FROM debian:buster-slim
+FROM debian
 
 # file maintainer author
-MAINTAINER Christophe Kamphaus <christophe.kamphaus@jemmic.com>
-LABEL maintainer="Christophe Kamphaus <christophe.kamphaus@jemmic.com>"
+MAINTAINER Yisheng Zhao <yisheng.eason@gmail.com>
+LABEL maintainer="Yisheng Zhao <yisheng.eason@gmail.com>>"
 
 # docker build environments
 ENV CONFIG_PATH="/opt/janus/etc/janus"
@@ -27,13 +27,13 @@ ARG JANUS_LIBWEBSOCKETS_VERSION="v3.2.2"
 
 ARG JANUS_WITH_POSTPROCESSING="1"
 ARG JANUS_WITH_BORINGSSL="1"
-ARG JANUS_WITH_DOCS="0"
+ARG JANUS_WITH_DOCS="1"
 ARG JANUS_WITH_REST="1"
-ARG JANUS_WITH_DATACHANNELS="0"
-ARG JANUS_WITH_WEBSOCKETS="0"
-ARG JANUS_WITH_MQTT="0"
-ARG JANUS_WITH_PFUNIX="0"
-ARG JANUS_WITH_RABBITMQ="0"
+ARG JANUS_WITH_DATACHANNELS="1"
+ARG JANUS_WITH_WEBSOCKETS="1"
+ARG JANUS_WITH_MQTT="1"
+ARG JANUS_WITH_PFUNIX="1"
+ARG JANUS_WITH_RABBITMQ="1"
 # https://goo.gl/dmbvc1
 ARG JANUS_WITH_FREESWITCH_PATCH="0"
 ARG JANUS_CONFIG_DEPS="\
@@ -72,7 +72,9 @@ ADD ./build.sh /tmp
 RUN /tmp/build.sh \
     && rm /tmp/build.sh
 
-USER janus
+COPY ./janus/etc/nginx/nginx.conf /etc/nginx/nginx.conf
+
+# USER janus
 
 # exposed ports
 EXPOSE 10000-10200/udp
@@ -82,5 +84,8 @@ EXPOSE 8889
 EXPOSE 8000
 EXPOSE 7088
 EXPOSE 7089
+EXPOSE 80
 
-CMD ["/opt/janus/bin/janus"]
+#CMD ["/opt/janus/bin/janus"]
+CMD echo "Built successfully!!!"
+CMD /bin/bash

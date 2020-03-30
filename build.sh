@@ -13,14 +13,16 @@ if [ $JANUS_WITH_WEBSOCKETS = "0" ]; then export JANUS_CONFIG_OPTIONS="$JANUS_CO
 if [ $JANUS_WITH_MQTT = "0" ]; then export JANUS_CONFIG_OPTIONS="$JANUS_CONFIG_OPTIONS --disable-mqtt"; fi
 if [ $JANUS_WITH_PFUNIX = "0" ]; then export JANUS_CONFIG_OPTIONS="$JANUS_CONFIG_OPTIONS --disable-unix-sockets"; fi
 if [ $JANUS_WITH_RABBITMQ = "0" ]; then export JANUS_CONFIG_OPTIONS="$JANUS_CONFIG_OPTIONS --disable-rabbitmq"; fi
-/usr/sbin/groupadd -r janus && /usr/sbin/useradd -r -g janus janus
+# /usr/sbin/groupadd -r janus && /usr/sbin/useradd -r -g janus janus && /usr/sbin/adduser janus sudo
 DEBIAN_FRONTEND=noninteractive apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get -yq --no-install-recommends install $JANUS_BUILD_DEPS_DEV ${JANUS_BUILD_DEPS_EXT}
+DEBIAN_FRONTEND=noninteractive apt-get install -y vim
+DEBIAN_FRONTEND=noninteractive apt-get install -y nginx
 
 # build libnice
 git clone https://gitlab.freedesktop.org/libnice/libnice ${BUILD_SRC}/libnice
 cd ${BUILD_SRC}/libnice
-git checkout ${JANUS_LIBNICE_VERSION}
+#git checkout ${JANUS_LIBNICE_VERSION}
 ./autogen.sh
 ./configure --prefix=/usr
 make
@@ -38,7 +40,7 @@ make install
 if [ $JANUS_WITH_BORINGSSL = "1" ]; then
     git clone https://boringssl.googlesource.com/boringssl ${BUILD_SRC}/boringssl
     cd ${BUILD_SRC}/boringssl
-    git checkout ${JANUS_BORINGSSL_VERSION}
+    #git checkout ${JANUS_BORINGSSL_VERSION}
     sed -i s/" -Werror"//g CMakeLists.txt
     mkdir -p ${BUILD_SRC}/boringssl/build
     cd ${BUILD_SRC}/boringssl/build
@@ -55,7 +57,7 @@ fi
 if [ $JANUS_WITH_DATACHANNELS = "1" ]; then
     git clone https://github.com/sctplab/usrsctp ${BUILD_SRC}/usrsctp
     cd ${BUILD_SRC}/usrsctp
-    git checkout ${JANUS_USRSCTP_VERSION}
+    #git checkout ${JANUS_USRSCTP_VERSION}
     ./bootstrap
     ./configure --prefix=/usr
     make
@@ -66,7 +68,7 @@ fi
 if [ $JANUS_WITH_WEBSOCKETS = "1" ]; then
     git clone https://github.com/warmcat/libwebsockets.git ${BUILD_SRC}/libwebsockets
     cd ${BUILD_SRC}/libwebsockets
-    git checkout ${JANUS_LIBWEBSOCKETS_VERSION}
+    #git checkout ${JANUS_LIBWEBSOCKETS_VERSION}
     mkdir ${BUILD_SRC}/libwebsockets/build
     cd ${BUILD_SRC}/libwebsockets/build
     # See https://github.com/meetecho/janus-gateway/issues/732 re: LWS_MAX_SMP
@@ -79,7 +81,7 @@ fi
 if [ $JANUS_WITH_MQTT = "1" ]; then
     git clone https://github.com/eclipse/paho.mqtt.c.git ${BUILD_SRC}/paho.mqtt.c
     cd ${BUILD_SRC}/paho.mqtt.c
-    git checkout ${JANUS_PAHO_MQTT_VERSION}
+    #git checkout ${JANUS_PAHO_MQTT_VERSION}
     make
     make install
 fi
@@ -88,7 +90,7 @@ fi
 if [ $JANUS_WITH_RABBITMQ = "1" ]; then
     git clone https://github.com/alanxz/rabbitmq-c ${BUILD_SRC}/rabbitmq-c
     cd ${BUILD_SRC}/rabbitmq-c
-    git checkout ${JANUS_RABBITMQ_VERSION}
+    #git checkout ${JANUS_RABBITMQ_VERSION}
     git submodule init
     git submodule update
     mkdir ${BUILD_SRC}/rabbitmq-c/build
@@ -111,13 +113,14 @@ if [ $JANUS_WITH_DOCS = "1" ]; then
     cmake -G "Unix Makefiles" ..
     make
     checkinstall --pkgname doxygen -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y graphviz #doxygen
 fi
 
 # build janus-gateway
 git clone https://github.com/meetecho/janus-gateway.git ${BUILD_SRC}/janus-gateway
 if [ $JANUS_WITH_FREESWITCH_PATCH = "1" ]; then curl -fSL https://raw.githubusercontent.com/krull/docker-misc/master/init_fs/tmp/janus_sip.c.patch -o ${BUILD_SRC}/janus-gateway/plugins/janus_sip.c.patch && cd ${BUILD_SRC}/janus-gateway/plugins && patch < janus_sip.c.patch; fi
 cd ${BUILD_SRC}/janus-gateway
-git checkout ${JANUS_VERSION}
+#git checkout ${JANUS_VERSION}
 ./autogen.sh
 ./configure ${JANUS_CONFIG_DEPS} $JANUS_CONFIG_OPTIONS
 make
@@ -125,7 +128,7 @@ make install
 make configs
 
 # folder ownership
-chown -R janus:janus /opt/janus
+# chown -R janus:janus /opt/janus
 
 # build cleanup
 cd ${BUILD_SRC}
